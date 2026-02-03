@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { Scanner } from "@yudiel/react-qr-scanner";
+import { apiFetch } from "../utils/api";
 
 export default function ScanQR() {
   const lastValueRef = useRef("");
@@ -19,10 +20,9 @@ export default function ScanQR() {
 
     setStatus("Sending...");
 
-    fetch("/api/admin/scan_qr.php", {
+    apiFetch("/admin/scan_qr.php", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: payload
     })
       .then(() => {
         setStatus("Attendance updated");

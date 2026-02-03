@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { apiFetch, safeJson } from "../utils/api";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -32,17 +33,16 @@ export default function Signup() {
     setStatus("Creating account...");
 
     try {
-      const res = await fetch("/api/signup.php", {
+      const res = await apiFetch("/signup.php", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: {
           name: form.name.trim(),
           email: form.email.trim(),
           password: form.password
-        })
+        }
       });
 
-      const data = await res.json();
+      const data = await safeJson(res);
 
       if (data.success) {
         setStatus("Account created. Please login.");
@@ -52,7 +52,7 @@ export default function Signup() {
           navigate("/login");
         }, 1000);
       } else {
-        setStatus(data.error || "Signup failed");
+        setStatus(data.error || `Signup failed (${res.status})`);
       }
     } catch (err) {
       console.error(err);
@@ -151,4 +151,3 @@ export default function Signup() {
     </section>
   );
 }
-

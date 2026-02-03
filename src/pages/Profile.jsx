@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { QRCodeCanvas } from "qrcode.react";
+import { apiFetch, safeJson } from "../utils/api";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -38,21 +39,21 @@ export default function Profile() {
 
   const loadStatus = async () => {
     if (!student_id) return;
-    const res = await fetch(`/api/checkStatus.php?student_id=${student_id}`);
-    const data = await res.json();
+    const res = await apiFetch(`/checkStatus.php?student_id=${student_id}`);
+    const data = await safeJson(res);
     setIsOnline(!!data.online);
     setSeconds(Number(data.seconds) || 0);
   };
 
   const loadAttendance = async () => {
-    const res = await fetch(`/api/todayAttendance.php?student_id=${student_id}`);
-    const data = await res.json();
+    const res = await apiFetch(`/todayAttendance.php?student_id=${student_id}`);
+    const data = await safeJson(res);
     setAttendance(data.present ? "Present today" : "Absent");
   };
 
   const loadWeeklyHours = async () => {
-    const res = await fetch(`/api/weeklyHours.php?student_id=${student_id}`);
-    const data = await res.json();
+    const res = await apiFetch(`/weeklyHours.php?student_id=${student_id}`);
+    const data = await safeJson(res);
     const total = Number(data.seconds) || 0;
     const h = Math.floor(total / 3600);
     const m = Math.floor((total % 3600) / 60);
@@ -60,26 +61,24 @@ export default function Profile() {
   };
 
   const loadRank = async () => {
-    const res = await fetch(`/api/rank.php?student_id=${student_id}`);
-    const data = await res.json();
+    const res = await apiFetch(`/rank.php?student_id=${student_id}`);
+    const data = await safeJson(res);
     setRank(data.rank || "--");
   };
 
   const startStudy = async () => {
-    await fetch("/api/startStudy.php", {
+    await apiFetch("/startStudy.php", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ student_id })
+      body: { student_id }
     });
     loadStatus();
     loadAttendance();
   };
 
   const stopStudy = async () => {
-    await fetch("/api/stopStudy.php", {
+    await apiFetch("/stopStudy.php", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ student_id })
+      body: { student_id }
     });
     setIsOnline(false);
     setSeconds(0);

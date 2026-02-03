@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiFetch, safeJson } from "../utils/api";
 
 export default function Students() {
   const [students, setStudents] = useState([]);
@@ -6,8 +7,8 @@ export default function Students() {
 
   const load = (query = "") => {
     setStatus("loading");
-    fetch(`/api/admin/students.php?search=${encodeURIComponent(query)}`)
-      .then((res) => res.json())
+    apiFetch(`/admin/students.php?search=${encodeURIComponent(query)}`)
+      .then(safeJson)
       .then((data) => {
         setStudents(Array.isArray(data) ? data : []);
         setStatus("ready");

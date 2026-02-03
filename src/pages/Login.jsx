@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { apiFetch, safeJson } from "../utils/api";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -31,13 +32,12 @@ export default function Login() {
     setStatus("Logging in...");
 
     try {
-      const res = await fetch("/api/login.php", {
+      const res = await apiFetch("/login.php", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form)
+        body: form
       });
 
-      const data = await res.json();
+      const data = await safeJson(res);
 
       if (data.success && data.user) {
         localStorage.setItem("user", JSON.stringify(data.user));
@@ -47,7 +47,7 @@ export default function Login() {
           navigate("/profile");
         }, 600);
       } else {
-        setStatus(data.error || "Login failed");
+        setStatus(data.error || `Login failed (${res.status})`);
       }
     } catch (err) {
       console.error(err);

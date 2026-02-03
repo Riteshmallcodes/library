@@ -2,9 +2,9 @@ import { useState } from "react";
 
 export default function Gallery() {
   const photos = [
-    "public/images/image.png",
-    "public/images/img2.jpeg",
-    "public/images/img3.jpeg"
+    "/images/image.png",
+    "/images/img2.jpeg",
+    "/images/img3.jpeg"
   ];
 
   const [activeImg, setActiveImg] = useState(null);

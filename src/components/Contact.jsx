@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiFetch, safeJson } from "../utils/api";
 
 export default function Contact() {
   const [form, setForm] = useState({
@@ -31,18 +32,12 @@ export default function Contact() {
     setStatus({ type: "info", message: "Sending message..." });
 
     try {
-      const response = await fetch(
-        "/api/contact.php",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(form)
-        }
-      );
+      const response = await apiFetch("/contact.php", {
+        method: "POST",
+        body: form
+      });
 
-      const data = await response.json();
+      const data = await safeJson(response);
 
       if (data.success) {
         setStatus({ type: "success", message: "Message sent successfully." });
@@ -50,7 +45,7 @@ export default function Contact() {
       } else {
         setStatus({
           type: "error",
-          message: "Server error: " + (data.error || "Unknown")
+          message: "Server error: " + (data.error || response.status)
         });
       }
     } catch (error) {

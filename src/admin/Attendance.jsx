@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiFetch, safeJson } from "../utils/api";
 
 export default function Attendance() {
   const [date, setDate] = useState("");
@@ -7,8 +8,8 @@ export default function Attendance() {
 
   const load = (nextDate = date) => {
     setStatus("loading");
-    fetch(`/api/admin/attendance.php?date=${nextDate}`)
-      .then((r) => r.json())
+    apiFetch(`/admin/attendance.php?date=${nextDate}`)
+      .then(safeJson)
       .then((payload) => {
         setRows(Array.isArray(payload) ? payload : []);
         setStatus("ready");

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip } from "recharts";
+import { apiFetch, safeJson } from "../utils/api";
 
 export default function Reports() {
   const [data, setData] = useState([]);
@@ -7,8 +8,8 @@ export default function Reports() {
 
   useEffect(() => {
     let active = true;
-    fetch("/api/admin/reports.php")
-      .then((r) => r.json())
+    apiFetch("/admin/reports.php")
+      .then(safeJson)
       .then((payload) => {
         if (!active) return;
         setData(Array.isArray(payload) ? payload : []);

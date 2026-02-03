@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { apiFetch, safeJson } from "../utils/api";
 
 const todayISO = () => {
   const now = new Date();
@@ -16,9 +17,9 @@ export default function AdminDashboard() {
     const date = todayISO();
 
     Promise.all([
-      fetch("/api/admin/students.php").then((r) => r.json()),
-      fetch(`/api/admin/attendance.php?date=${date}`).then((r) => r.json()),
-      fetch("/api/admin/reports.php").then((r) => r.json())
+      apiFetch("/admin/students.php").then(safeJson),
+      apiFetch(`/admin/attendance.php?date=${date}`).then(safeJson),
+      apiFetch("/admin/reports.php").then(safeJson)
     ])
       .then(([studentsRes, attendanceRes, reportsRes]) => {
         if (!active) return;
