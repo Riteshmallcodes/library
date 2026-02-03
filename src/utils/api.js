@@ -1,6 +1,10 @@
 export async function apiFetch(path, options = {}) {
-  const API = import.meta.env.VITE_API_URL || "";
-  const base = path.startsWith("http") ? path : `${API}${path.startsWith("/") ? "" : "/"}${path}`;
+  const envApi = import.meta.env.VITE_API_URL;
+  const fallbackApi = import.meta.env.PROD ? "/api" : "";
+  const API = envApi ?? fallbackApi;
+  const base = path.startsWith("http")
+    ? path
+    : `${API}${path.startsWith("/") ? "" : "/"}${path}`;
 
   const opts = { ...options };
   const method = (opts.method || "GET").toUpperCase();

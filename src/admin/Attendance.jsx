@@ -8,10 +8,18 @@ export default function Attendance() {
 
   const load = (nextDate = date) => {
     setStatus("loading");
-    apiFetch(`/admin/attendance.php?date=${nextDate}`)
+    const query = nextDate ? `?date=${encodeURIComponent(nextDate)}` : "";
+    apiFetch(`/admin/attendance.php${query}`)
       .then(safeJson)
       .then((payload) => {
-        setRows(Array.isArray(payload) ? payload : []);
+        const list = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.data)
+          ? payload.data
+          : Array.isArray(payload?.records)
+          ? payload.records
+          : [];
+        setRows(list);
         setStatus("ready");
       })
       .catch(() => setStatus("error"));
@@ -84,6 +92,7 @@ export default function Attendance() {
           <thead>
             <tr>
               <th>ID</th>
+              <th>Date</th>
               <th>In</th>
               <th>Out</th>
             </tr>
@@ -91,14 +100,15 @@ export default function Attendance() {
           <tbody>
             {rows.length === 0 && status === "ready" && (
               <tr>
-                <td colSpan="3">No attendance records.</td>
+                <td colSpan="4">No attendance records.</td>
               </tr>
             )}
-            {rows.map((row) => (
-              <tr key={row.id ?? `${row.student_id}-${row.in_time}`}>
-                <td>{row.student_id}</td>
-                <td>{row.in_time}</td>
-                <td>{row.out_time || "-"}</td>
+            {rows.map((row, index) => (
+              <tr key={row.id ?? `${row.student_id ?? "stu"}-${index}`}>
+                <td>{row.student_id ?? row.studentId ?? row.id ?? "-"}</td>
+                <td>{row.date ?? "-"}</td>
+                <td>{row.in_time ?? row.in ?? "-"}</td>
+                <td>{row.out_time ?? row.out ?? "-"}</td>
               </tr>
             ))}
           </tbody>

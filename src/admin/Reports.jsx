@@ -12,7 +12,14 @@ export default function Reports() {
       .then(safeJson)
       .then((payload) => {
         if (!active) return;
-        setData(Array.isArray(payload) ? payload : []);
+        const list = Array.isArray(payload)
+          ? payload
+          : Array.isArray(payload?.data)
+          ? payload.data
+          : Array.isArray(payload?.reports)
+          ? payload.reports
+          : [];
+        setData(list);
         setStatus("ready");
       })
       .catch(() => {
@@ -28,8 +35,8 @@ export default function Reports() {
   const chartData = useMemo(
     () =>
       data.map((row) => ({
-        date: row.date ?? row.day ?? "",
-        hours: Number(row.hours ?? 0)
+        date: row.date ?? row.day ?? row.label ?? "",
+        hours: Number(row.hours ?? row.total_hours ?? row.value ?? 0)
       })),
     [data]
   );
@@ -81,13 +88,32 @@ export default function Reports() {
       )}
 
       {status === "ready" && chartData.length > 0 && (
-        <div className="admin-card" style={{ width: "fit-content" }}>
+        <div className="admin-card" style={{ display: "grid", gap: 16 }}>
           <LineChart width={350} height={250} data={chartData}>
             <XAxis dataKey="date" />
             <YAxis />
             <Tooltip />
             <Line type="monotone" dataKey="hours" stroke="#2563eb" />
           </LineChart>
+
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Hours</th>
+                </tr>
+              </thead>
+              <tbody>
+                {chartData.map((row, index) => (
+                  <tr key={`${row.date || "row"}-${index}`}>
+                    <td>{row.date || "-"}</td>
+                    <td>{row.hours}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
