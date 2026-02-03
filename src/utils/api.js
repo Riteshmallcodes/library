@@ -41,10 +41,18 @@ export async function apiFetch(path, options = {}) {
 
 export async function safeJson(res) {
   const text = await res.text();
+  if (!res.ok) {
+    const snippet = text ? text.slice(0, 200) : "";
+    throw new Error(`Request failed (${res.status}). ${snippet}`);
+  }
   if (!text) return {};
+  const trimmed = text.trim();
+  if (trimmed.startsWith("<!doctype") || trimmed.startsWith("<html")) {
+    throw new Error("Unexpected HTML response from API");
+  }
   try {
     return JSON.parse(text);
   } catch {
-    return { error: "Invalid JSON response", raw: text };
+    throw new Error("Invalid JSON response");
   }
 }
