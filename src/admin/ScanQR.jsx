@@ -1,11 +1,36 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Scanner } from "@yudiel/react-qr-scanner";
-import { apiFetch } from "../utils/api";
+import { apiFetch, safeJson } from "../utils/api";
 
 export default function ScanQR() {
   const lastValueRef = useRef("");
+  const busyRef = useRef(false);
+  const resetTimerRef = useRef(null);
   const [status, setStatus] = useState("");
+  const [tone, setTone] = useState("neutral");
+  const [user, setUser] = useState(null);
   const [manual, setManual] = useState("");
+
+  useEffect(() => {
+    return () => {
+      if (resetTimerRef.current) {
+        clearTimeout(resetTimerRef.current);
+      }
+    };
+  }, []);
+
+  const scheduleReset = () => {
+    if (resetTimerRef.current) {
+      clearTimeout(resetTimerRef.current);
+    }
+    resetTimerRef.current = setTimeout(() => {
+      setStatus("");
+      setTone("neutral");
+      setUser(null);
+      busyRef.current = false;
+      lastValueRef.current = "";
+    }, 3000);
+  };
 
   const sendPayload = (value) => {
     let payload = { qr: value };
@@ -18,17 +43,46 @@ export default function ScanQR() {
       payload = { qr: value };
     }
 
-    setStatus("Sending...");
+    setStatus("Scanning...");
+    setTone("neutral");
 
     apiFetch("/admin/scan_qr.php", {
       method: "POST",
       body: payload
     })
-      .then(() => {
-        setStatus("Attendance updated");
+      .then(safeJson)
+      .then((data) => {
+        const person = data?.student || data?.user || data?.data || null;
+        const name =
+          person?.name ||
+          person?.student_name ||
+          data?.name ||
+          data?.student_name ||
+          "";
+        const id =
+          person?.student_id ||
+          person?.id ||
+          data?.student_id ||
+          data?.id ||
+          "";
+        const message = data?.message || data?.status || "Attendance updated";
+
+        setUser(
+          name || id
+            ? {
+                name: name || "Unknown",
+                id: id || "-"
+              }
+            : null
+        );
+        setStatus(message);
+        setTone("success");
+        scheduleReset();
       })
-      .catch(() => {
-        setStatus("Unable to mark attendance");
+      .catch((err) => {
+        setStatus(err?.message || "Unable to mark attendance");
+        setTone("error");
+        scheduleReset();
       });
   };
 
@@ -36,22 +90,26 @@ export default function ScanQR() {
     if (!Array.isArray(detectedCodes) || detectedCodes.length === 0) return;
 
     const value = detectedCodes[0]?.rawValue;
-    if (!value || value === lastValueRef.current) return;
+    if (!value || value === lastValueRef.current || busyRef.current) return;
 
     lastValueRef.current = value;
-    setTimeout(() => {
-      if (lastValueRef.current === value) {
-        lastValueRef.current = "";
-      }
-    }, 4000);
+    busyRef.current = true;
 
     sendPayload(value);
   };
 
   const handleManualSubmit = () => {
-    if (!manual.trim()) return;
+    if (!manual.trim() || busyRef.current) return;
+    busyRef.current = true;
     sendPayload(manual.trim());
   };
+
+  const panelClass =
+    tone === "success"
+      ? "scan-panel scan-panel-success"
+      : tone === "error"
+      ? "scan-panel scan-panel-error"
+      : "scan-panel";
 
   return (
     <div className="admin-page">
@@ -65,9 +123,30 @@ export default function ScanQR() {
       <div className="admin-card" style={{ display: "grid", gap: 16 }}>
         <Scanner
           onScan={handleScan}
-          onError={(error) => setStatus(error?.message || "Camera error")}
+          onError={(error) => {
+            setStatus(error?.message || "Camera error");
+            setTone("error");
+          }}
           constraints={{ facingMode: { ideal: "environment" } }}
         />
+
+        <div className={panelClass}>
+          <p className="scan-label">
+            {tone === "success"
+              ? "Scan successful"
+              : tone === "error"
+              ? "Scan failed"
+              : "Ready to scan"}
+          </p>
+          {user ? (
+            <div className="scan-user">
+              <p className="scan-name">{user.name}</p>
+              <p className="scan-id">ID: {user.id}</p>
+            </div>
+          ) : (
+            <p className="scan-id">{status || "Point the camera at a QR code."}</p>
+          )}
+        </div>
 
         <div className="admin-actions">
           <input
@@ -76,12 +155,10 @@ export default function ScanQR() {
             value={manual}
             onChange={(e) => setManual(e.target.value)}
           />
-          <button className="admin-btn" onClick={handleManualSubmit}>
+          <button className="admin-btn" onClick={handleManualSubmit} disabled={busyRef.current}>
             Submit
           </button>
         </div>
-
-        {status && <p className="admin-muted">{status}</p>}
       </div>
     </div>
   );

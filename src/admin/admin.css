@@ -167,6 +167,49 @@
   padding: 16px;
 }
 
+.scan-panel {
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  display: grid;
+  gap: 8px;
+}
+
+.scan-panel-success {
+  background: #ecfdf3;
+  border-color: #86efac;
+  color: #166534;
+}
+
+.scan-panel-error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.scan-label {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.scan-user {
+  display: grid;
+  gap: 4px;
+}
+
+.scan-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.scan-id {
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
