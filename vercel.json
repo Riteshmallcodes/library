@@ -1,0 +1,9 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://api.livoras.online/:path*"
+    },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
