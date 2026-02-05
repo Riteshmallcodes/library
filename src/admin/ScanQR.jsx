@@ -12,7 +12,6 @@ export default function ScanQR() {
   const [status, setStatus] = useState("");
   const [tone, setTone] = useState("neutral");
   const [user, setUser] = useState(null);
-  const [manual, setManual] = useState("");
   const [armed, setArmed] = useState(false);
 
   useEffect(() => {
@@ -26,8 +25,8 @@ export default function ScanQR() {
     };
   }, []);
 
-  const REARM_DELAY_MS = 2500;
-  const DUPLICATE_WINDOW_MS = 2500;
+  const REARM_DELAY_MS = 1500;
+  const DUPLICATE_WINDOW_MS = 1200;
   const MIN_OUT_DELAY_MS = 60000;
 
   const armRescan = () => {
@@ -188,12 +187,6 @@ export default function ScanQR() {
     sendPayload(value);
   };
 
-  const handleManualSubmit = () => {
-    if (!manual.trim() || busyRef.current) return;
-    busyRef.current = true;
-    sendPayload(manual.trim());
-  };
-
   const panelClass =
     tone === "success"
       ? "scan-panel scan-panel-success"
@@ -220,6 +213,27 @@ export default function ScanQR() {
           constraints={{ facingMode: { ideal: "environment" } }}
         />
 
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <button
+            className="admin-btn"
+            onClick={() => {
+              if (busyRef.current) return;
+              setArmed(true);
+              setStatus("Ready to scan");
+              setTone("neutral");
+            }}
+            style={{
+              width: 96,
+              height: 96,
+              borderRadius: "50%",
+              fontWeight: 700,
+              fontSize: 16
+            }}
+          >
+            Scan
+          </button>
+        </div>
+
         <div className={panelClass}>
           <p className="scan-label">
             {tone === "success"
@@ -234,40 +248,11 @@ export default function ScanQR() {
             <div className="scan-user">
               <p className="scan-name">{user.name}</p>
               <p className="scan-id">ID: {user.id}</p>
+              {status ? <p className="scan-id">{status}</p> : null}
             </div>
           ) : (
             <p className="scan-id">{status || "Point the camera at a QR code."}</p>
           )}
-        </div>
-
-        <div className="admin-actions" style={{ gap: 12, flexWrap: "wrap" }}>
-          <button
-            className="admin-btn"
-            onClick={() => {
-              if (busyRef.current) return;
-              setArmed(true);
-              setStatus("");
-              setTone("neutral");
-            }}
-            style={{
-              width: 64,
-              height: 64,
-              borderRadius: "50%",
-              fontWeight: 700
-            }}
-          >
-            Scan
-          </button>
-
-          <input
-            className="admin-input"
-            placeholder="Manual QR value"
-            value={manual}
-            onChange={(e) => setManual(e.target.value)}
-          />
-          <button className="admin-btn" onClick={handleManualSubmit} disabled={busyRef.current}>
-            Submit
-          </button>
         </div>
       </div>
     </div>
