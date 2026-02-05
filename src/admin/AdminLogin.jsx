@@ -6,11 +6,22 @@ export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const envEmail = import.meta.env.VITE_ADMIN_EMAIL;
+  const envPassword = import.meta.env.VITE_ADMIN_PASSWORD;
+  const fallbackEmail = import.meta.env.DEV ? "admin@library.com" : "";
+  const fallbackPassword = import.meta.env.DEV ? "admin123" : "";
+  const allowedEmail = envEmail || fallbackEmail;
+  const allowedPassword = envPassword || fallbackPassword;
 
   const handleLogin = (e) => {
     e.preventDefault();
 
-    if (email === "admin@library.com" && password === "admin123") {
+    if (!allowedEmail || !allowedPassword) {
+      setError("Admin credentials not configured");
+      return;
+    }
+
+    if (email === allowedEmail && password === allowedPassword) {
       localStorage.setItem("admin", "true");
       navigate("/admin", { replace: true });
     } else {
@@ -42,7 +53,7 @@ export default function AdminLogin() {
           <span>Password</span>
           <input
             type="password"
-            placeholder="••••••••"
+            placeholder="????????"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required

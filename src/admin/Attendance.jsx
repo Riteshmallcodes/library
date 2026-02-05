@@ -62,11 +62,11 @@ export default function Attendance() {
   const downloadCSV = () => {
     if (!rows.length) return;
 
-    const headers = ["Student ID", "In Time", "Out Time"];
+    const headers = ["Student Name", "Student ID", "Date"];
     const lines = rows.map((row) => [
+      row.name ?? row.student_name ?? "",
       row.student_id ?? "",
-      row.in_time ?? "",
-      row.out_time ?? "-"
+      row.date ?? row.attendance_date ?? row.day ?? ""
     ]);
 
     const csv = [headers, ...lines]
@@ -125,54 +125,22 @@ export default function Attendance() {
         <table>
           <thead>
             <tr>
+              <th>Name</th>
               <th>ID</th>
               <th>Date</th>
-              <th>In</th>
-              <th>Out</th>
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 && status === "ready" && (
               <tr>
-                <td colSpan="4">No attendance records.</td>
+                <td colSpan="3">No attendance records.</td>
               </tr>
             )}
             {rows.map((row, index) => (
               <tr key={row.id ?? `${row.student_id ?? "stu"}-${index}`}>
+                <td>{row.name ?? row.student_name ?? "-"}</td>
                 <td>{row.student_id ?? row.studentId ?? row.id ?? "-"}</td>
                 <td>{row.date ?? row.attendance_date ?? row.day ?? "-"}</td>
-                <td>
-                  {normalizeTime(
-                    pickFirst(row, [
-                      "in_time",
-                      "inTime",
-                      "in_datetime",
-                      "inDateTime",
-                      "time_in",
-                      "check_in",
-                      "checkIn",
-                      "start_time",
-                      "startTime",
-                      "in"
-                    ])
-                  )}
-                </td>
-                <td>
-                  {normalizeTime(
-                    pickFirst(row, [
-                      "out_time",
-                      "outTime",
-                      "out_datetime",
-                      "outDateTime",
-                      "time_out",
-                      "check_out",
-                      "checkOut",
-                      "end_time",
-                      "endTime",
-                      "out"
-                    ])
-                  )}
-                </td>
               </tr>
             ))}
           </tbody>

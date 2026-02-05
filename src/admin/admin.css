@@ -1,14 +1,26 @@
+:root {
+  --admin-bg: #f6f7fb;
+  --admin-surface: #ffffff;
+  --admin-border: #e2e8f0;
+  --admin-text: #0f172a;
+  --admin-muted: #5b6b80;
+  --admin-primary: #1d4ed8;
+  --admin-primary-soft: #e0e7ff;
+  --admin-danger: #b91c1c;
+}
+
 .admin-layout {
   display: grid;
   grid-template-columns: 240px 1fr;
   min-height: 100vh;
-  background: #f8fafc;
-  color: #0f172a;
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  font-family: "Poppins", "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 
 .admin-sidebar {
-  background: #ffffff;
-  border-right: 1px solid #e2e8f0;
+  background: var(--admin-surface);
+  border-right: 1px solid var(--admin-border);
   padding: 24px 20px;
   display: grid;
   gap: 18px;
@@ -24,7 +36,7 @@
   font-size: 0.72rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #64748b;
+  color: var(--admin-muted);
   font-weight: 600;
 }
 
@@ -43,15 +55,15 @@
 }
 
 .admin-nav a.active {
-  background: #eff6ff;
-  color: #2563eb;
+  background: var(--admin-primary-soft);
+  color: var(--admin-primary);
 }
 
 .admin-logout {
   margin-top: auto;
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
-  color: #0f172a;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-surface);
+  color: var(--admin-text);
   padding: 10px 12px;
   border-radius: 10px;
   font-weight: 600;
@@ -83,34 +95,36 @@
 
 .admin-btn {
   border: none;
-  background: #111827;
+  background: var(--admin-primary);
   color: #ffffff;
   padding: 10px 16px;
   border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .admin-btn-ghost {
-  background: #ffffff;
-  color: #111827;
-  border: 1px solid #e2e8f0;
+  background: var(--admin-surface);
+  color: var(--admin-text);
+  border: 1px solid var(--admin-border);
 }
 
 .admin-input {
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--admin-border);
   border-radius: 10px;
   padding: 10px 12px;
   min-width: 220px;
-  background: #ffffff;
+  background: var(--admin-surface);
+  color: var(--admin-text);
 }
 
 .admin-muted {
-  color: #64748b;
+  color: var(--admin-muted);
 }
 
 .admin-error {
-  color: #b91c1c;
+  color: var(--admin-danger);
 }
 
 .cards {
@@ -128,7 +142,7 @@
 
 .summary-card {
   background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--admin-border);
   border-radius: 12px;
   padding: 14px 16px;
 }
@@ -140,10 +154,10 @@
 }
 
 .card {
-  background: #ffffff;
+  background: var(--admin-surface);
   padding: 18px;
   border-radius: 14px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--admin-border);
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
 }
 
@@ -154,15 +168,15 @@
 }
 
 .table-wrap {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
   border-radius: 14px;
   overflow: hidden;
 }
 
 .admin-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
   border-radius: 14px;
   padding: 16px;
 }
@@ -170,7 +184,7 @@
 .scan-panel {
   border-radius: 14px;
   padding: 16px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--admin-border);
   background: #f8fafc;
   display: grid;
   gap: 8px;
@@ -222,8 +236,8 @@ th, td {
 }
 
 th {
-  background: #f1f5f9;
-  color: #0f172a;
+  background: #eef2ff;
+  color: var(--admin-text);
   font-weight: 600;
 }
 
@@ -235,14 +249,15 @@ tbody tr:nth-child(even) {
   min-height: 100vh;
   display: grid;
   place-items: center;
-  background: #f8fafc;
+  background: var(--admin-bg);
   padding: 24px;
+  font-family: "Poppins", "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 
 .admin-login-box {
   width: min(420px, 100%);
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
   border-radius: 18px;
   padding: 28px;
   display: grid;
@@ -255,7 +270,7 @@ tbody tr:nth-child(even) {
 }
 
 .admin-login-note {
-  color: #64748b;
+  color: var(--admin-muted);
   font-size: 0.95rem;
 }
 
@@ -268,7 +283,7 @@ tbody tr:nth-child(even) {
 
 .admin-field input {
   width: 100%;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--admin-border);
   border-radius: 10px;
   padding: 10px 12px;
 }
@@ -281,9 +296,9 @@ tbody tr:nth-child(even) {
 }
 
 .admin-menu-btn {
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
-  color: #0f172a;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-surface);
+  color: var(--admin-text);
   padding: 8px 12px;
   border-radius: 10px;
   font-weight: 600;
@@ -292,7 +307,7 @@ tbody tr:nth-child(even) {
 
 .admin-mobile-title {
   font-weight: 600;
-  color: #0f172a;
+  color: var(--admin-text);
 }
 
 .admin-overlay {

@@ -4,7 +4,7 @@ export default function FloatingContact() {
   return (
     <div className="floating-contact" aria-label="Quick contact">
       <a
-        href="tel:+919876543210"
+        href="tel:+918009185367"
         className="float-btn call-btn"
         title="Call now"
         aria-label="Call now"
@@ -13,7 +13,7 @@ export default function FloatingContact() {
       </a>
 
       <a
-        href="https://wa.me/919876543210"
+        href="https://wa.me/8009185367"
         target="_blank"
         rel="noopener noreferrer"
         className="float-btn whatsapp-btn"
@@ -24,7 +24,7 @@ export default function FloatingContact() {
       </a>
 
       <a
-        href="https://www.google.com/maps?q=XYZ+Library+Kushinagar"
+        href="https://maps.app.goo.gl/e1hJ1YiZR5CGYfXy7"
         target="_blank"
         rel="noopener noreferrer"
         className="float-btn map-btn"
