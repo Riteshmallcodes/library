@@ -143,6 +143,8 @@ export default function ScanQR() {
             : typeof data?.action === "string"
             ? data.action.toUpperCase()
             : "";
+        const finalStatus =
+          action === "IN" || action === "OUT" ? action : message;
 
         setUser(
           name || id
@@ -152,7 +154,7 @@ export default function ScanQR() {
               }
             : null
         );
-        setStatus(message);
+        setStatus(finalStatus);
         setTone("success");
         if (id && (action === "IN" || action === "OUT")) {
           lastByIdRef.current[id] = {
