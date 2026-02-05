@@ -1,36 +1,37 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiFetch, safeJson } from "../utils/api";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const envEmail = import.meta.env.VITE_ADMIN_EMAIL;
-  const envPassword = import.meta.env.VITE_ADMIN_PASSWORD;
-  const isLocalhost =
-    typeof window !== "undefined" &&
-    (window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1");
-  const fallbackEmail = isLocalhost ? "admin@library.com" : "";
-  const fallbackPassword = isLocalhost ? "admin123" : "";
-  const allowedEmail = envEmail || fallbackEmail;
-  const allowedPassword = envPassword || fallbackPassword;
-
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
 
-    if (!allowedEmail || !allowedPassword) {
-      setError("Admin credentials not configured. Set VITE_ADMIN_EMAIL and VITE_ADMIN_PASSWORD.");
-      return;
-    }
+    try {
+      const res = await apiFetch("/admin/admin_login.php", {
+        method: "POST",
+        body: { email, password }
+      });
+      const data = await safeJson(res);
 
-    if (email === allowedEmail && password === allowedPassword) {
-      localStorage.setItem("admin", "true");
-      navigate("/admin", { replace: true });
-    } else {
-      setError("Invalid admin credentials");
+      if (data?.success) {
+        localStorage.setItem("admin", JSON.stringify(data.admin || { email }));
+        navigate("/admin", { replace: true });
+        return;
+      }
+
+      setError(data?.error || "Login failed");
+    } catch (err) {
+      setError(err?.message || "Network error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -65,8 +66,8 @@ export default function AdminLogin() {
           />
         </label>
 
-        <button type="submit" className="admin-btn">
-          Login
+        <button type="submit" className="admin-btn" disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
         </button>
 
         {error && <p className="admin-error">{error}</p>}
