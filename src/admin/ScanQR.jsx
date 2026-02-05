@@ -4,6 +4,8 @@ import { apiFetch, safeJson } from "../utils/api";
 
 export default function ScanQR() {
   const lastValueRef = useRef("");
+  const lastScanAtRef = useRef(0);
+  const lastByIdRef = useRef({});
   const busyRef = useRef(false);
   const resetTimerRef = useRef(null);
   const rearmTimerRef = useRef(null);
@@ -11,6 +13,7 @@ export default function ScanQR() {
   const [tone, setTone] = useState("neutral");
   const [user, setUser] = useState(null);
   const [manual, setManual] = useState("");
+  const [armed, setArmed] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -24,6 +27,8 @@ export default function ScanQR() {
   }, []);
 
   const REARM_DELAY_MS = 2500;
+  const DUPLICATE_WINDOW_MS = 2500;
+  const MIN_OUT_DELAY_MS = 60000;
 
   const armRescan = () => {
     if (rearmTimerRef.current) {
@@ -44,6 +49,7 @@ export default function ScanQR() {
       setUser(null);
       busyRef.current = false;
       lastValueRef.current = "";
+      setArmed(false);
     }, 3000);
   };
 
@@ -64,6 +70,24 @@ export default function ScanQR() {
     return null;
   };
 
+  const normalizeResultMessage = (data) => {
+    const action =
+      data?.action ||
+      data?.type ||
+      data?.status ||
+      data?.result ||
+      "";
+
+    if (typeof action === "string") {
+      const lower = action.toLowerCase();
+      if (lower.includes("already") && lower.includes("in")) return "Already IN";
+      if (lower === "in" || lower.includes("check in")) return "IN";
+      if (lower === "out" || lower.includes("check out")) return "OUT";
+    }
+
+    return data?.message || data?.status || "Attendance updated";
+  };
+
   const sendPayload = (value) => {
     const payload = buildPayload(value);
     if (!payload) {
@@ -72,6 +96,19 @@ export default function ScanQR() {
       busyRef.current = false;
       scheduleReset();
       return;
+    }
+
+    const studentId = payload.student_id || payload.id;
+    if (studentId) {
+      const last = lastByIdRef.current[studentId];
+      if (last?.action === "IN" && Date.now() - last.at < MIN_OUT_DELAY_MS) {
+        setStatus("Already IN");
+        setTone("neutral");
+        setUser({ name: last.name || "Student", id: studentId });
+        busyRef.current = false;
+        scheduleReset();
+        return;
+      }
     }
 
     setStatus("Scanning...");
@@ -93,10 +130,17 @@ export default function ScanQR() {
         const id =
           person?.student_id ||
           person?.id ||
-          data?.student_id ||
-          data?.id ||
+          payload.student_id ||
+          payload.id ||
           "";
-        const message = data?.message || data?.status || "Attendance updated";
+
+        const message = normalizeResultMessage(data);
+        const action =
+          typeof data?.status === "string"
+            ? data.status.toUpperCase()
+            : typeof data?.action === "string"
+            ? data.action.toUpperCase()
+            : "";
 
         setUser(
           name || id
@@ -108,6 +152,13 @@ export default function ScanQR() {
         );
         setStatus(message);
         setTone("success");
+        if (id && (action === "IN" || action === "OUT")) {
+          lastByIdRef.current[id] = {
+            action,
+            at: Date.now(),
+            name
+          };
+        }
         scheduleReset();
       })
       .catch((err) => {
@@ -119,14 +170,19 @@ export default function ScanQR() {
 
   const handleScan = (detectedCodes) => {
     if (!Array.isArray(detectedCodes) || detectedCodes.length === 0) return;
+    if (!armed || busyRef.current) return;
 
     const value = detectedCodes[0]?.rawValue;
-    if (!value || busyRef.current) return;
+    if (!value) return;
+
+    const now = Date.now();
+    if (value === lastValueRef.current && now - lastScanAtRef.current < DUPLICATE_WINDOW_MS) {
+      return;
+    }
 
     armRescan();
-    if (value === lastValueRef.current) return;
-
     lastValueRef.current = value;
+    lastScanAtRef.current = now;
     busyRef.current = true;
 
     sendPayload(value);
@@ -170,7 +226,9 @@ export default function ScanQR() {
               ? "Scan successful"
               : tone === "error"
               ? "Scan failed"
-              : "Ready to scan"}
+              : armed
+              ? "Ready to scan"
+              : "Tap Scan to start"}
           </p>
           {user ? (
             <div className="scan-user">
@@ -182,7 +240,25 @@ export default function ScanQR() {
           )}
         </div>
 
-        <div className="admin-actions">
+        <div className="admin-actions" style={{ gap: 12, flexWrap: "wrap" }}>
+          <button
+            className="admin-btn"
+            onClick={() => {
+              if (busyRef.current) return;
+              setArmed(true);
+              setStatus("");
+              setTone("neutral");
+            }}
+            style={{
+              width: 64,
+              height: 64,
+              borderRadius: "50%",
+              fontWeight: 700
+            }}
+          >
+            Scan
+          </button>
+
           <input
             className="admin-input"
             placeholder="Manual QR value"

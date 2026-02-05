@@ -6,6 +6,40 @@ export default function Attendance() {
   const [rows, setRows] = useState([]);
   const [status, setStatus] = useState("idle");
 
+  const pickFirst = (row, keys) => {
+    for (const key of keys) {
+      if (row?.[key] != null && row?.[key] !== "") return row[key];
+    }
+    return null;
+  };
+
+  const normalizeTime = (value) => {
+    if (value == null) return "-";
+    if (typeof value === "number") {
+      const dt = new Date(value * 1000);
+      return Number.isNaN(dt.getTime()) ? "-" : dt.toLocaleTimeString();
+    }
+    if (typeof value === "object") {
+      const nested =
+        value.time ||
+        value.value ||
+        value.timestamp ||
+        value.datetime ||
+        value.dateTime ||
+        null;
+      return normalizeTime(nested);
+    }
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (!trimmed) return "-";
+      // If it already looks like a time, show as-is
+      if (/^\d{1,2}:\d{2}/.test(trimmed)) return trimmed;
+      const dt = new Date(trimmed);
+      return Number.isNaN(dt.getTime()) ? trimmed : dt.toLocaleTimeString();
+    }
+    return String(value);
+  };
+
   const load = (nextDate = date) => {
     setStatus("loading");
     const query = nextDate ? `?date=${encodeURIComponent(nextDate)}` : "";
@@ -106,9 +140,39 @@ export default function Attendance() {
             {rows.map((row, index) => (
               <tr key={row.id ?? `${row.student_id ?? "stu"}-${index}`}>
                 <td>{row.student_id ?? row.studentId ?? row.id ?? "-"}</td>
-                <td>{row.date ?? "-"}</td>
-                <td>{row.in_time ?? row.in ?? "-"}</td>
-                <td>{row.out_time ?? row.out ?? "-"}</td>
+                <td>{row.date ?? row.attendance_date ?? row.day ?? "-"}</td>
+                <td>
+                  {normalizeTime(
+                    pickFirst(row, [
+                      "in_time",
+                      "inTime",
+                      "in_datetime",
+                      "inDateTime",
+                      "time_in",
+                      "check_in",
+                      "checkIn",
+                      "start_time",
+                      "startTime",
+                      "in"
+                    ])
+                  )}
+                </td>
+                <td>
+                  {normalizeTime(
+                    pickFirst(row, [
+                      "out_time",
+                      "outTime",
+                      "out_datetime",
+                      "outDateTime",
+                      "time_out",
+                      "check_out",
+                      "checkOut",
+                      "end_time",
+                      "endTime",
+                      "out"
+                    ])
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
