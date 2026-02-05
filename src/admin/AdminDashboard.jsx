@@ -41,8 +41,17 @@ export default function AdminDashboard() {
   const metrics = useMemo(() => {
     const date = todayISO();
     const totalStudents = students.length;
-    const todayAttendance = attendance.length;
-    const onlineStudents = attendance.filter((row) => !row.out_time).length;
+    const uniqueAttendance = new Map();
+    attendance.forEach((row) => {
+      const id = row.student_id ?? row.studentId ?? row.id;
+      if (id && !uniqueAttendance.has(id)) {
+        uniqueAttendance.set(id, row);
+      }
+    });
+    const todayAttendance = uniqueAttendance.size;
+    const onlineStudents = Array.from(uniqueAttendance.values()).filter(
+      (row) => !(row.out_time ?? row.out ?? row.end_time ?? row.endTime)
+    ).length;
     const todayHours = reports
       .filter((row) => (row.date ?? row.day ?? "") === date)
       .reduce((sum, row) => sum + Number(row.hours ?? 0), 0);
@@ -90,24 +99,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="cards">
-        <div className="card">
-          <p className="card-label">Total Students</p>
-          <h3>{metrics.totalStudents}</h3>
-        </div>
-        <div className="card">
-          <p className="card-label">Online Students</p>
-          <h3>{metrics.onlineStudents}</h3>
-        </div>
-        <div className="card">
-          <p className="card-label">Today Attendance</p>
-          <h3>{metrics.todayAttendance}</h3>
-        </div>
-        <div className="card">
-          <p className="card-label">Study Hours</p>
-          <h3>{metrics.todayHours}h</h3>
-        </div>
-      </div>
     </div>
   );
 }

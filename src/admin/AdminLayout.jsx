@@ -28,7 +28,9 @@ export default function AdminLayout() {
           <NavLink to="/admin/students">Students</NavLink>
           <NavLink to="/admin/attendance">Attendance</NavLink>
           <NavLink to="/admin/reports">Reports</NavLink>
+          <NavLink to="/admin/online">Online Students</NavLink>
           <NavLink to="/admin/scan">Scan QR</NavLink>
+          <NavLink to="/admin/contact">Contact</NavLink>
         </nav>
 
         <button className="admin-logout" onClick={logout}>

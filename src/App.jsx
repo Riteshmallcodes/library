@@ -22,6 +22,8 @@ import Students from "./admin/Students";
 import Attendance from "./admin/Attendance";
 import Reports from "./admin/Reports";
 import ScanQR from "./admin/ScanQR";
+import OnlineStudents from "./admin/OnlineStudents";
+import AdminContact from "./admin/AdminContact";
 
 function UserLayout() {
   return (
@@ -65,7 +67,9 @@ function App() {
           <Route path="students" element={<Students />} />
           <Route path="attendance" element={<Attendance />} />
           <Route path="reports" element={<Reports />} />
+          <Route path="online" element={<OnlineStudents />} />
           <Route path="scan" element={<ScanQR />} />
+          <Route path="contact" element={<AdminContact />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -5,6 +5,7 @@ export default function Attendance() {
   const [date, setDate] = useState("");
   const [rows, setRows] = useState([]);
   const [status, setStatus] = useState("idle");
+  const [studentsById, setStudentsById] = useState({});
 
   const pickFirst = (row, keys) => {
     for (const key of keys) {
@@ -64,7 +65,7 @@ export default function Attendance() {
 
     const headers = ["Student Name", "Student ID", "Date"];
     const lines = rows.map((row) => [
-      row.name ?? row.student_name ?? "",
+      row.name ?? row.student_name ?? studentsById[row.student_id] ?? "",
       row.student_id ?? "",
       row.date ?? row.attendance_date ?? row.day ?? ""
     ]);
@@ -89,6 +90,18 @@ export default function Attendance() {
 
   useEffect(() => {
     load("");
+    apiFetch("/admin/students.php")
+      .then(safeJson)
+      .then((data) => {
+        const list = Array.isArray(data) ? data : [];
+        const map = {};
+        list.forEach((s) => {
+          const id = s.student_id ?? s.id;
+          if (id) map[id] = s.name ?? s.student_name ?? s.full_name ?? "";
+        });
+        setStudentsById(map);
+      })
+      .catch(() => {});
   }, []);
 
   return (
@@ -138,7 +151,12 @@ export default function Attendance() {
             )}
             {rows.map((row, index) => (
               <tr key={row.id ?? `${row.student_id ?? "stu"}-${index}`}>
-                <td>{row.name ?? row.student_name ?? "-"}</td>
+                <td>
+                  {row.name ??
+                    row.student_name ??
+                    studentsById[row.student_id] ??
+                    "-"}
+                </td>
                 <td>{row.student_id ?? row.studentId ?? row.id ?? "-"}</td>
                 <td>{row.date ?? row.attendance_date ?? row.day ?? "-"}</td>
               </tr>
