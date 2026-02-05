@@ -63,11 +63,23 @@ export default function Attendance() {
   const downloadCSV = () => {
     if (!rows.length) return;
 
-    const headers = ["Student Name", "Student ID", "Date"];
+    const headers = ["Student Name", "Student ID", "Date", "Time"];
     const lines = rows.map((row) => [
       row.name ?? row.student_name ?? studentsById[row.student_id] ?? "",
       row.student_id ?? "",
-      row.date ?? row.attendance_date ?? row.day ?? ""
+      row.date ?? row.attendance_date ?? row.day ?? "",
+      normalizeTime(
+        pickFirst(row, [
+          "in_time",
+          "inTime",
+          "start_time",
+          "startTime",
+          "time_in",
+          "check_in",
+          "created_at",
+          "createdAt"
+        ])
+      )
     ]);
 
     const csv = [headers, ...lines]
@@ -141,12 +153,13 @@ export default function Attendance() {
               <th>Name</th>
               <th>ID</th>
               <th>Date</th>
+              <th>Time</th>
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 && status === "ready" && (
               <tr>
-                <td colSpan="3">No attendance records.</td>
+                <td colSpan="4">No attendance records.</td>
               </tr>
             )}
             {rows.map((row, index) => (
@@ -159,6 +172,20 @@ export default function Attendance() {
                 </td>
                 <td>{row.student_id ?? row.studentId ?? row.id ?? "-"}</td>
                 <td>{row.date ?? row.attendance_date ?? row.day ?? "-"}</td>
+                <td>
+                  {normalizeTime(
+                    pickFirst(row, [
+                      "in_time",
+                      "inTime",
+                      "start_time",
+                      "startTime",
+                      "time_in",
+                      "check_in",
+                      "created_at",
+                      "createdAt"
+                    ])
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
