@@ -13,14 +13,14 @@ const normalizeList = (payload) => {
 export default function AdminContact() {
   const [rows, setRows] = useState([]);
   const [status, setStatus] = useState("loading");
-  const [source, setSource] = useState("/contacts.php");
+  const [source, setSource] = useState("/admin/admincontact.php");
 
   useEffect(() => {
     let active = true;
 
     const load = async () => {
       setStatus("loading");
-      const endpoints = ["/contacts.php"];
+      const endpoints = ["/admin/admincontact.php"];
       let lastError = null;
 
       for (const endpoint of endpoints) {

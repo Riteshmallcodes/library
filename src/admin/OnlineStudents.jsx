@@ -54,6 +54,7 @@ const formatDuration = (ms) => {
 
 export default function OnlineStudents() {
   const [attendance, setAttendance] = useState([]);
+  const [source, setSource] = useState("");
   const [studentsById, setStudentsById] = useState({});
   const [status, setStatus] = useState("loading");
   const [now, setNow] = useState(Date.now());
@@ -67,25 +68,44 @@ export default function OnlineStudents() {
     let active = true;
     const date = todayISO();
 
-    Promise.all([
-      apiFetch(`/admin/attendance.php?date=${date}`).then(safeJson),
-      apiFetch("/admin/students.php").then(safeJson)
-    ])
-      .then(([attendanceRes, studentsRes]) => {
+    const load = async () => {
+      try {
+        const studentsRes = await apiFetch("/admin/students.php").then(safeJson);
         if (!active) return;
-        setAttendance(normalizeList(attendanceRes));
         const map = {};
         normalizeList(studentsRes).forEach((s) => {
           const id = s.student_id ?? s.id;
           if (id) map[id] = s.name ?? s.student_name ?? s.full_name ?? "";
         });
         setStudentsById(map);
-        setStatus("ready");
-      })
-      .catch(() => {
+
+        const endpoints = [
+          `/admin/attendance.php?date=${date}`,
+          `/admin/study_sessions.php?date=${date}`,
+          `/admin/study_sessions.php`
+        ];
+
+        for (const endpoint of endpoints) {
+          try {
+            const list = await apiFetch(endpoint).then(safeJson);
+            if (!active) return;
+            setAttendance(normalizeList(list));
+            setSource(endpoint);
+            setStatus("ready");
+            return;
+          } catch {
+            // try next endpoint
+          }
+        }
+
+        if (active) setStatus("error");
+      } catch {
         if (!active) return;
         setStatus("error");
-      });
+      }
+    };
+
+    load();
 
     return () => {
       active = false;
@@ -166,6 +186,12 @@ export default function OnlineStudents() {
           </tbody>
         </table>
       </div>
+
+      {status === "ready" && source && (
+        <p className="admin-muted" style={{ marginTop: 12 }}>
+          Source: {source}
+        </p>
+      )}
     </div>
   );
 }
