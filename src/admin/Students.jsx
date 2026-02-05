@@ -56,13 +56,17 @@ export default function Students() {
                 <td colSpan="3">No students found.</td>
               </tr>
             )}
-            {students.map((s) => (
-              <tr key={s.student_id}>
+            {students.map((s, i) => {
+              const key =
+                s.student_id ?? s.email ?? `${s.name ?? "student"}-${i}`;
+              return (
+                <tr key={key}>
                 <td>{s.student_id}</td>
                 <td>{s.name}</td>
                 <td>{s.email}</td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
