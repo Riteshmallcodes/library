@@ -13,14 +13,18 @@ const normalizeList = (payload) => {
 export default function AdminContact() {
   const [rows, setRows] = useState([]);
   const [status, setStatus] = useState("loading");
-  const [source, setSource] = useState("/contacts.php");
+  const [source, setSource] = useState("/admin/admincontact.php");
 
   useEffect(() => {
     let active = true;
 
     const load = async () => {
       setStatus("loading");
-      const endpoints = ["/contacts.php"];
+      const endpoints = [
+        "/admin/admincontact.php",
+        "/admin/contacts.php",
+        "/contacts.php"
+      ];
       let lastError = null;
 
       for (const endpoint of endpoints) {
@@ -74,7 +78,6 @@ export default function AdminContact() {
           <thead>
             <tr>
               <th>Name</th>
-              <th>Email</th>
               <th>Phone</th>
               <th>Message</th>
               <th>Date</th>
@@ -83,13 +86,12 @@ export default function AdminContact() {
           <tbody>
             {status === "ready" && rows.length === 0 && (
               <tr>
-                <td colSpan="5">No contact requests.</td>
+                <td colSpan="4">No contact requests.</td>
               </tr>
             )}
             {rows.map((row, index) => (
               <tr key={row.id ?? `${row.email ?? "contact"}-${index}`}>
                 <td>{row.name ?? row.full_name ?? row.username ?? "-"}</td>
-                <td>{row.email ?? row.user_email ?? "-"}</td>
                 <td>{row.phone ?? row.mobile ?? row.contact ?? "-"}</td>
                 <td>{row.message ?? row.query ?? row.notes ?? "-"}</td>
                 <td>{row.date ?? row.created_at ?? row.createdAt ?? todayISO()}</td>
