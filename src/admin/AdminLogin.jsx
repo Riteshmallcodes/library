@@ -6,10 +6,15 @@ export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+
   const envEmail = import.meta.env.VITE_ADMIN_EMAIL;
   const envPassword = import.meta.env.VITE_ADMIN_PASSWORD;
-  const fallbackEmail = import.meta.env.DEV ? "admin@library.com" : "";
-  const fallbackPassword = import.meta.env.DEV ? "admin123" : "";
+  const isLocalhost =
+    typeof window !== "undefined" &&
+    (window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1");
+  const fallbackEmail = isLocalhost ? "admin@library.com" : "";
+  const fallbackPassword = isLocalhost ? "admin123" : "";
   const allowedEmail = envEmail || fallbackEmail;
   const allowedPassword = envPassword || fallbackPassword;
 
@@ -17,7 +22,7 @@ export default function AdminLogin() {
     e.preventDefault();
 
     if (!allowedEmail || !allowedPassword) {
-      setError("Admin credentials not configured");
+      setError("Admin credentials not configured. Set VITE_ADMIN_EMAIL and VITE_ADMIN_PASSWORD.");
       return;
     }
 
