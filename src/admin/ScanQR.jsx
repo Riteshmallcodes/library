@@ -98,12 +98,13 @@ export default function ScanQR() {
     }
 
     const studentId = payload.student_id || payload.id;
+    const payloadName = payload.name || payload.student_name || "";
     if (studentId) {
       const last = lastByIdRef.current[studentId];
       if (last?.action === "IN" && Date.now() - last.at < MIN_OUT_DELAY_MS) {
         setStatus("Already IN");
         setTone("neutral");
-        setUser({ name: last.name || "Student", id: studentId });
+        setUser({ name: last.name || payloadName || "Student", id: studentId });
         busyRef.current = false;
         scheduleReset();
         return;
@@ -125,6 +126,8 @@ export default function ScanQR() {
           person?.student_name ||
           data?.name ||
           data?.student_name ||
+          payload.name ||
+          payload.student_name ||
           "";
         const id =
           person?.student_id ||
