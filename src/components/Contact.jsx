@@ -34,6 +34,7 @@ export default function Contact() {
     try {
       const response = await apiFetch("/contact.php", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: form
       });
 
@@ -45,7 +46,7 @@ export default function Contact() {
       } else {
         setStatus({
           type: "error",
-          message: "Server error: " + (data.error || response.status)
+          message: data.error || "Server error"
         });
       }
     } catch (error) {

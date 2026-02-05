@@ -27,8 +27,16 @@ export default function AdminContact() {
         try {
           const res = await apiFetch(endpoint);
           const data = await safeJson(res);
+          if (data?.success === false) {
+            throw new Error(data?.error || "Unable to load contact data");
+          }
           if (!active) return;
-          setRows(normalizeList(data));
+          const list = normalizeList(data);
+          if (!list.length) {
+            setRows([]);
+          } else {
+            setRows(list);
+          }
           setSource(endpoint);
           setStatus("ready");
           return;
