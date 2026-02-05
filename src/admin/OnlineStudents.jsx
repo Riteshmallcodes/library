@@ -12,6 +12,10 @@ const normalizeList = (payload) => {
 
 const parseTime = (dateStr, timeStr) => {
   if (!timeStr) return null;
+  if (typeof timeStr === "number") {
+    const dt = new Date(timeStr * 1000);
+    return Number.isNaN(dt.getTime()) ? null : dt;
+  }
   if (typeof timeStr === "string") {
     const trimmed = timeStr.trim();
     if (!trimmed) return null;
@@ -19,9 +23,20 @@ const parseTime = (dateStr, timeStr) => {
       const dt = new Date(trimmed);
       return Number.isNaN(dt.getTime()) ? null : dt;
     }
+    if (/^\d{4}-\d{2}-\d{2}\s+\d{1,2}:\d{2}/.test(trimmed)) {
+      const dt = new Date(trimmed.replace(" ", "T"));
+      return Number.isNaN(dt.getTime()) ? null : dt;
+    }
     if (/^\d{1,2}:\d{2}/.test(trimmed)) {
       const dt = new Date(`${dateStr}T${trimmed}`);
       return Number.isNaN(dt.getTime()) ? null : dt;
+    }
+    if (/^\d+$/.test(trimmed)) {
+      const num = Number(trimmed);
+      if (Number.isFinite(num)) {
+        const dt = new Date(num * 1000);
+        return Number.isNaN(dt.getTime()) ? null : dt;
+      }
     }
   }
   return null;
